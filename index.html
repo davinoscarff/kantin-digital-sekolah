@@ -36,7 +36,7 @@ h2 { color: #087f5b; }
   border-radius: 12px;
   box-shadow: 0 2px 8px #0001;
 }
-.item .emoji { font-size: 38px; }
+.emoji { font-size: 38px; }
 .item h3 { margin: 10px 0; }
 .price { color: #087f5b; font-weight: bold; }
 button {
@@ -57,9 +57,12 @@ button:hover { background: #056044; }
 .cart-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 10px;
   margin: 12px 0;
+  flex-wrap: wrap;
 }
+.qty button { margin: 2px; }
 footer {
   text-align: center;
   padding: 20px;
@@ -70,94 +73,112 @@ footer {
 <body>
 
 <header>
-  <h1>🍱 Kantin Digital Sekolah</h1>
-  <p>Pesan makanan dan minuman dengan mudah!</p>
+<h1>🍱 Kantin Digital Sekolah</h1>
+<p>Pesan makanan dan minuman dengan mudah!</p>
 </header>
 
 <div class="container">
-  <h2>📋 Daftar Menu</h2>
-  <div class="menu" id="menu"></div>
+<h2>📋 Daftar Menu</h2>
+<div class="menu" id="menu"></div>
 
-  <div class="cart">
-    <h2>🛒 Keranjang Belanja</h2>
-    <div id="cart">Belum ada pesanan.</div>
-    <h3>Total: <span id="total">Rp0</span></h3>
-    <button onclick="checkout()">Pesan Sekarang</button>
-  </div>
+<div class="cart">
+<h2>🛒 Keranjang Belanja</h2>
+<div id="cart">Belum ada pesanan.</div>
+<h3>Total: <span id="total">Rp0</span></h3>
+<button onclick="checkout()">Pesan Sekarang</button>
+</div>
 </div>
 
 <footer>
-  © 2026 Kantin Digital Sekolah
+© 2026 Kantin Digital Sekolah
 </footer>
 
 <script>
 const products = [
-  {name:"Nasi Goreng",price:12000,emoji:"🍛"},
-  {name:"Mie Goreng",price:10000,emoji:"🍜"},
-  {name:"Roti",price:5000,emoji:"🍞"},
-  {name:"Sate Ayam",price:15000,emoji:"🍢"},
-  {name:"Es Teh",price:4000,emoji:"🧋"},
-  {name:"Air Mineral",price:3000,emoji:"💧"}
+{name:"Nasi Goreng",price:12000,emoji:"🍛"},
+{name:"Mie Goreng",price:10000,emoji:"🍜"},
+{name:"Roti",price:5000,emoji:"🍞"},
+{name:"Sate Ayam",price:15000,emoji:"🍢"},
+{name:"Es Teh",price:4000,emoji:"🧋"},
+{name:"Air Mineral",price:3000,emoji:"💧"}
 ];
 
 let cart = [];
 
 function rupiah(n) {
-  return "Rp" + n.toLocaleString("id-ID");
+return "Rp" + n.toLocaleString("id-ID");
 }
 
 function showMenu() {
-  document.getElementById("menu").innerHTML =
-    products.map((p,i) => `
-      <div class="item">
-        <div class="emoji">${p.emoji}</div>
-        <h3>${p.name}</h3>
-        <p class="price">${rupiah(p.price)}</p>
-        <button onclick="addCart(${i})">Tambah</button>
-      </div>
-    `).join("");
+document.getElementById("menu").innerHTML =
+products.map((p,i) => `
+<div class="item">
+<div class="emoji">${p.emoji}</div>
+<h3>${p.name}</h3>
+<p class="price">${rupiah(p.price)}</p>
+<button onclick="addCart(${i})">Tambah</button>
+</div>
+`).join("");
 }
 
 function addCart(i) {
-  const found = cart.find(x => x.name === products[i].name);
-  if(found) {
-    found.qty++;
-  } else {
-    cart.push({...products[i],qty:1});
-  }
-  showCart();
+const found = cart.find(x => x.name === products[i].name);
+if(found) {
+found.qty++;
+} else {
+cart.push({...products[i],qty:1});
+}
+showCart();
 }
 
 function showCart() {
-  const el = document.getElementById("cart");
-  if(cart.length === 0) {
-    el.innerHTML = "Belum ada pesanan.";
-  } else {
-    el.innerHTML = cart.map((p,i) => `
-      <div class="cart-row">
-        <span>${p.name} x ${p.qty}</span>
-        <span>${rupiah(p.price*p.qty)}
-        <button onclick="removeItem(${i})">Hapus</button></span>
-      </div>
-    `).join("");
-  }
+const el = document.getElementById("cart");
 
-  const total = cart.reduce((s,p) => s+p.price*p.qty,0);
-  document.getElementById("total").textContent = rupiah(total);
+if(cart.length === 0) {
+el.innerHTML = "Belum ada pesanan.";
+} else {
+el.innerHTML = cart.map((p,i) => `
+<div class="cart-row">
+<span>${p.name} - ${rupiah(p.price)}</span>
+<div class="qty">
+<button onclick="changeQty(${i},-1)">−</button>
+<strong>${p.qty}</strong>
+<button onclick="changeQty(${i},1)">+</button>
+<button onclick="removeItem(${i})">Hapus</button>
+</div>
+</div>
+`).join("");
+}
+
+const total = cart.reduce((s,p) => s+p.price*p.qty,0);
+document.getElementById("total").textContent = rupiah(total);
+}
+
+function changeQty(i,amount) {
+cart[i].qty += amount;
+if(cart[i].qty <= 0) {
+cart.splice(i,1);
+}
+showCart();
 }
 
 function removeItem(i) {
-  cart.splice(i,1);
-  showCart();
+cart.splice(i,1);
+showCart();
 }
 
 function checkout() {
-  if(cart.length === 0) {
-    alert("Keranjang masih kosong!");
-    return;
-  }
-  const total = cart.reduce((s,p) => s+p.price*p.qty,0);
-  alert("Pesanan berhasil dibuat!\nTotal: "+rupiah(total));
+if(cart.length === 0) {
+alert("Keranjang masih kosong!");
+return;
+}
+
+const total = cart.reduce((s,p) => s+p.price*p.qty,0);
+
+alert("Pesanan berhasil dibuat!\nTotal: "+rupiah(total));
+
+cart = [];
+showCart();
 }
 
 showMenu();
