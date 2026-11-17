@@ -85,6 +85,23 @@ footer {
 <h2>🛒 Keranjang Belanja</h2>
 <div id="cart">Belum ada pesanan.</div>
 <h3>Total: <span id="total">Rp0</span></h3>
+
+<h3>📝 Data Pemesan</h3>
+
+<input
+  type="text"
+  id="nama"
+  placeholder="Masukkan nama siswa"
+  style="padding:10px;width:100%;margin-bottom:10px;"
+>
+
+<input
+  type="text"
+  id="kelas"
+  placeholder="Masukkan kelas"
+  style="padding:10px;width:100%;margin-bottom:10px;"
+>
+
 <button onclick="checkout()">Pesan Sekarang</button>
 </div>
 </div>
@@ -168,19 +185,40 @@ showCart();
 }
 
 function checkout() {
-if(cart.length === 0) {
-alert("Keranjang masih kosong!");
-return;
+  if(cart.length === 0) {
+    alert("Keranjang masih kosong!");
+    return;
+  }
+
+  const nama = document.getElementById("nama").value.trim();
+  const kelas = document.getElementById("kelas").value.trim();
+
+  if(nama === "" || kelas === "") {
+    alert("Nama dan kelas harus diisi!");
+    return;
+  }
+
+  const total = cart.reduce((s,p) => s+p.price*p.qty,0);
+
+  const detail = cart.map(p =>
+    p.name + " x " + p.qty + " = " + rupiah(p.price*p.qty)
+  ).join("\n");
+
+  const konfirmasi = confirm(
+    "Periksa pesanan:\n\n" +
+    "Nama: " + nama +
+    "\nKelas: " + kelas +
+    "\n\n" + detail +
+    "\n\nTotal: " + rupiah(total)
+  );
+
+  if(!konfirmasi) return;
+
+  alert("Pesanan berhasil dibuat!");
+
+  cart = [];
+  showCart();
 }
-
-const total = cart.reduce((s,p) => s+p.price*p.qty,0);
-
-alert("Pesanan berhasil dibuat!\nTotal: "+rupiah(total));
-
-cart = [];
-showCart();
-}
-
 showMenu();
 showCart();
 </script>
